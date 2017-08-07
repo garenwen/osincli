@@ -48,7 +48,6 @@ func (c *AuthorizeRequest) GetAuthorizeUrl() *url.URL {
 func (c *AuthorizeRequest) GetAuthorizeUrlWithParams(state string) *url.URL {
 	u := *c.client.configcache.authorizeUrl
 	uq := u.Query()
-	//TODO 增加微信方式
 	switch c.client.serverType {
 	case Wechat:
 		uq.Add("appid", c.client.config.Wechat.Appid)
