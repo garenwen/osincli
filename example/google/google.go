@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/RangelReale/osincli"
+	"github.com/garenwen/osincli"
 	"fmt"
 	"io/ioutil"
 	"net/http"

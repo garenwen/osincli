@@ -13,6 +13,9 @@ func TestGetTokenUrl(t *testing.T) {
 		AuthorizeUrl: "https://example.com/authorize",
 		RedirectUrl:  "/",
 		Scope:        "scope1 scope2",
+		Wechat:WechatClientConfig{
+			Appid:"myappId",
+			Secret:"mysecret"},
 	}
 
 	testcases := map[string]struct {
@@ -56,7 +59,7 @@ func TestGetTokenUrl(t *testing.T) {
 		},
 	}
 
-	client, err := NewClient(&clientConfig)
+	client, err := NewClient(&clientConfig,Normal)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -113,7 +116,7 @@ func TestGetTokenUrlPKCE(t *testing.T) {
 			URL:    generatedConfigTokenUrl,
 		},
 	} {
-		client, err := NewClient(test.Config)
+		client, err := NewClient(test.Config,Normal)
 		if err != nil {
 			t.Fatal(err)
 		}

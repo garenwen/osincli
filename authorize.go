@@ -48,8 +48,14 @@ func (c *AuthorizeRequest) GetAuthorizeUrl() *url.URL {
 func (c *AuthorizeRequest) GetAuthorizeUrlWithParams(state string) *url.URL {
 	u := *c.client.configcache.authorizeUrl
 	uq := u.Query()
+	//TODO 增加微信方式
+	switch c.client.serverType {
+	case Wechat:
+		uq.Add("appid", c.client.config.Wechat.Appid)
+	case Normal:
+		uq.Add("client_id", c.client.config.ClientId)
+	}
 	uq.Add("response_type", string(c.Type))
-	uq.Add("client_id", c.client.config.ClientId)
 	uq.Add("redirect_uri", c.client.config.RedirectUrl)
 	if c.client.config.Scope != "" {
 		uq.Add("scope", c.client.config.Scope)

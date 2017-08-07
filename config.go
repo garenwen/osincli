@@ -15,4 +15,12 @@ type ClientConfig struct {
 	CodeChallenge       string
 	CodeChallengeMethod string
 	CodeVerifier        string
+
+	//wechat
+	Wechat WechatClientConfig
+}
+
+type WechatClientConfig struct {
+	Appid string
+	Secret string
 }

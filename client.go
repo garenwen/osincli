@@ -12,6 +12,13 @@ type clientconfigCache struct {
 	tokenUrl     *url.URL
 }
 
+const(
+	Wechat   = "wechat"
+	Github   = "github"
+	LinkedIn = "linkedin"
+	Normal = "normal"
+)
+
 type Client struct {
 	// caches urls
 	configcache clientconfigCache
@@ -22,18 +29,36 @@ type Client struct {
 	// Transport is the HTTP transport to use when making requests.
 	// It will default to http.DefaultTransport if nil.
 	Transport http.RoundTripper
+
+	//oauth2 server
+	serverType string
+	//
 }
 
 // Creates a new client
-func NewClient(config *ClientConfig) (*Client, error) {
+
+func NewClient(config *ClientConfig,server string) (*Client, error) {
 	c := &Client{
 		config: config,
+		serverType:server,
 	}
 	return c, c.initialize()
 }
 
 func (c *Client) initialize() error {
-	if c.config.ClientId == "" || c.config.AuthorizeUrl == "" ||
+
+	switch c.serverType {
+	case Wechat:
+		if c.config.Wechat.Appid == ""{
+			return errors.New("Missing configuration")
+		}
+	case Normal:
+		if c.config.ClientId == ""{
+			return errors.New("Missing configuration")
+		}
+	}
+
+	if c.config.AuthorizeUrl == "" ||
 		c.config.TokenUrl == "" || c.config.RedirectUrl == "" {
 		return errors.New("Missing configuration")
 	}

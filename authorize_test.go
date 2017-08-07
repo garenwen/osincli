@@ -49,7 +49,7 @@ func TestGetAuthorizeUrl(t *testing.T) {
 			URL:    generatedConfigAuthorizeUrl,
 		},
 	} {
-		client, err := NewClient(test.Config)
+		client, err := NewClient(test.Config,Normal)
 		if err != nil {
 			t.Fatalf("Unexpected error: %#v", err)
 		}

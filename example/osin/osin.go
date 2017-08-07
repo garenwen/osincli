@@ -4,7 +4,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/RangelReale/osincli"
+	"github.com/garenwen/osincli"
 	"net/http"
 )
 

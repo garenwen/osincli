@@ -33,6 +33,16 @@ type AccessData struct {
 	RefreshToken string
 	Expiration   *int32
 	ResponseData ResponseData
+	Wechat WechatAccessData
+}
+
+type WechatAccessData struct {
+//	openid":"OPENID",
+//"scope":"SCOPE",
+//"unionid": "o6_bmasdasdsad6_2sgVt7hMZOPfL"
+	OpenId string
+	Scope string
+	UnionId string
 }
 
 func (c *Client) NewAccessRequest(t AccessRequestType, ad *AuthorizeData) *AccessRequest {
@@ -102,10 +112,19 @@ func (c *AccessRequest) GetTokenUrl() *url.URL {
 			uq.Add("scope", c.client.config.Scope)
 		}
 	}
-
 	if c.client.config.SendClientSecretInParams {
+
+	switch c.client.serverType {
+	case Normal:
 		uq.Add("client_id", c.client.config.ClientId)
 		uq.Add("client_secret", c.client.config.ClientSecret)
+
+	case Wechat:
+		uq.Add("appid", c.client.config.Wechat.Appid)
+		uq.Add("secret", c.client.config.Wechat.Secret)
+	}
+
+
 	}
 	if c.CustomParameters != nil {
 		for pn, pv := range c.CustomParameters {
@@ -124,7 +143,13 @@ func (c *AccessRequest) GetToken() (*AccessData, error) {
 	tu := c.GetTokenUrl()
 	var ba *BasicAuth
 	if !c.client.config.SendClientSecretInParams {
-		ba = &BasicAuth{Username: c.client.config.ClientId, Password: c.client.config.ClientSecret}
+		switch c.client.serverType {
+		case Normal:
+			ba = &BasicAuth{Username: c.client.config.ClientId, Password: c.client.config.ClientSecret}
+		case Wechat:
+
+			ba = &BasicAuth{Username: c.client.config.Wechat.Appid, Password: c.client.config.Wechat.Secret}
+		}
 	}
 
 	// return value
@@ -142,12 +167,7 @@ func (c *AccessRequest) GetToken() (*AccessData, error) {
 		return nil, err
 	}
 
-	// extract and convert received data
-	token_type, ok := ret.ResponseData["token_type"]
-	if !ok {
-		return nil, errors.New("Invalid parameters received")
-	}
-	ret.TokenType = fmt.Sprintf("%v", token_type)
+
 
 	access_token, ok := ret.ResponseData["access_token"]
 	if !ok {
@@ -160,6 +180,38 @@ func (c *AccessRequest) GetToken() (*AccessData, error) {
 		ret.RefreshToken = ""
 	} else {
 		ret.RefreshToken = fmt.Sprintf("%v", refresh_token)
+	}
+
+	switch c.client.serverType {
+	case Normal:
+		// extract and convert received data
+		token_type, ok := ret.ResponseData["token_type"]
+		if !ok {
+			return nil, errors.New("Invalid parameters received")
+		}
+		ret.TokenType = fmt.Sprintf("%v", token_type)
+	case Wechat:
+		//openid":"OPENID",
+		//"scope":"SCOPE",
+		//"unionid": "o6_bmasdasdsad6_2sgVt7hMZOPfL"
+
+		openid ,ok := ret.ResponseData["openid"]
+		if !ok {
+			return nil, errors.New("Invalid parameters received")
+		}
+		ret.Wechat.OpenId = fmt.Sprintf("%v", openid)
+
+		scope ,ok := ret.ResponseData["scope"]
+		if !ok {
+			return nil, errors.New("Invalid parameters received")
+		}
+		ret.Wechat.Scope = fmt.Sprintf("%v", scope)
+
+		unionid ,ok := ret.ResponseData["unionid"]
+		if !ok {
+			return nil, errors.New("Invalid parameters received")
+		}
+		ret.Wechat.UnionId = fmt.Sprintf("%v", unionid)
 	}
 
 	expires_in_raw, ok := ret.ResponseData["expires_in"]
